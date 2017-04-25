@@ -1,8 +1,9 @@
+#include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include <fstream>
-#include "Apriori.h"
+
 #include "test.h"
+#include "Apriori.h"
 
 using namespace std;
 
@@ -41,13 +42,32 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	test t;
-
+	//test t;
+	clog << "------------------------------------------------------" << endl;
+	clog << "Welcome to use Apriori to mine association rules!" << endl;
+	clog << "Author: Weibing Wang" << endl;
+	clog << "Data: 2017-04-25" << endl;
+	clog << "------------------------------------------------------" << endl;
+	clog << "Minimun Support: " << support << endl;
+	clog << "Minimum Confidence: " << confidence << endl;
+	
 	Apriori apriori(in, support, confidence);
+	clog << "Minimum Support Count: " << apriori.getMin_sup_count() << endl;
+	clog << "Transactions Size: " << apriori.getTransactionSize() << endl;
 	apriori.run();
+	clog << "Apriori is mining......" << endl;
+	clog << "Mined done!" << endl;
+	clog << "Frequent Item Set Size: " << apriori.getFrequentItemSetSize() << endl;
+	clog << "Association Rules Size: " << apriori.getRulesSize() << endl;
+
+	ofstream out("rules.csv");
+	apriori.save(out);
+	clog << "Mining result have been saved to file \"rules.csv\"" << endl;
 
 	//clog << "OK!" << endl;
 	in.close();
-	system("pause");
+	out.close();
+	//system("type rules.csv");
+	//system("pause");
 	return 0;
 }

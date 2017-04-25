@@ -1,8 +1,9 @@
 #pragma once
-#include <assert.h>
-#include <time.h>
 #include <set>
+#include <time.h>
+#include <assert.h>
 #include <iostream>
+
 #include "HashTree.h"
 
 using namespace std;

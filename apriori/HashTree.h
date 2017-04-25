@@ -1,8 +1,8 @@
 #pragma once
-#include <vector>
-#include <set>
-#include <assert.h>
 #include <map>
+#include <set>
+#include <vector>
+#include <assert.h>
 
 using namespace std;
 
@@ -55,8 +55,8 @@ public:
 		root.hashCount(transaction);
 	}
 
-	void collectFk(map<set<int>,int> &Fk,int min_sup_count) {
-		root.collectFk(Fk,min_sup_count);
+	void collectFk(map<set<int>, int> &Fk, int min_sup_count) {
+		root.collectFk(Fk, min_sup_count);
 	}
 
 };

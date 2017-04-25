@@ -1,7 +1,7 @@
 #include "test.h"
 
 test::test() {
-	//hashTreeTest();//已经成功
+	hashTreeTest();//已经成功
 }
 
 inline void test::hashTreeTest() {
