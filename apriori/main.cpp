@@ -1,3 +1,4 @@
+#include <time.h>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
@@ -9,6 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+	clock_t begin = clock();
 	double support = 0;
 	double confidence = 0;
 
@@ -54,14 +56,14 @@ int main(int argc, char** argv) {
 	Apriori apriori(in, support, confidence);
 	clog << "Minimum Support Count: " << apriori.getMin_sup_count() << endl;
 	clog << "Transactions Size: " << apriori.getTransactionSize() << endl;
-	apriori.run();
 	clog << "Apriori is mining......" << endl;
+	apriori.run();
 	clog << "Mined done!" << endl;
 	clog << "Frequent Item Set Size: " << apriori.getFrequentItemSetSize() << endl;
 	clog << "Association Rules Size: " << apriori.getRulesSize() << endl;
 
 	ofstream out("rules.csv");
-	apriori.save(out);
+	apriori.saveAssociation(out);
 	clog << "Mining result have been saved to file \"rules.csv\"" << endl;
 
 	//clog << "OK!" << endl;
@@ -69,5 +71,6 @@ int main(int argc, char** argv) {
 	out.close();
 	//system("type rules.csv");
 	//system("pause");
+	clog << "Use time: "<<clock() - begin <<"ms"<< endl;
 	return 0;
 }

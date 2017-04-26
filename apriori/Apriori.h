@@ -13,7 +13,7 @@ class Apriori {
 public:
 
 	Apriori(ifstream &_in, double _min_sup, double _min_conf) :min_sup(_min_sup), min_conf(_min_conf) {
-		this->readFromFile(_in);
+		this->readTransactions(_in);
 	}
 
 	void run();
@@ -24,6 +24,8 @@ public:
 
 	void save(ofstream &out);
 
+	void saveAssociation(ofstream &out);
+
 
 private:
 
@@ -33,13 +35,17 @@ private:
 
 	int min_sup_count;//最小支持度计数
 
+	map<string, int> dict;//Item从字符串表示到数字表示的映射；
+
 	vector<set<int>> T;//所有事务的集合
 
 	vector<map<set<int>, int>> Fk;//频繁项集的集合
 
-	vector<Rule> rules;
+	vector<Rule> rules;//所挖掘到的关联规则的集合
 
 	void readFromFile(ifstream &in);
+
+	void readTransactions(ifstream &in);
 
 	map<set<int>, int>& apriori_gen(map<set<int>, int> &C, int k);
 
@@ -86,5 +92,7 @@ public:
 	double lift;//lift 提升度
 
 	void save(ofstream &out);
+
+	void saveAssociation(ofstream & out, map<int, string> &dictionary);
 
 };

@@ -1,8 +1,9 @@
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
 #include "Apriori.h"
 #include "HashTree.h"
-#include <algorithm>
-#include <sstream>
-#include <iostream>
 
 void Apriori::readFromFile(ifstream &in)
 {
@@ -14,6 +15,27 @@ void Apriori::readFromFile(ifstream &in)
 			istringstream valuestream(value);
 			int num;
 			valuestream >> num;
+			itemset.insert(num);
+		}
+		//T.push_back(itemset);
+		T.push_back(set<int>());
+		T.back().swap(itemset);
+	}
+	this->min_sup_count = T.size()*min_sup;
+}
+
+void Apriori::readTransactions(ifstream & in)
+{
+	string line, value;
+	while (getline(in, line)) {
+		istringstream linestream(line);
+		set<int> itemset;
+		while (getline(linestream, value, ',')) {
+			int num = dict[value];//查询，如若失败，则插入，值为0
+			if (num == 0) {
+				num = dict.size();//查询失败，则重新编号
+				dict[value] = num;
+			}
 			itemset.insert(num);
 		}
 		//T.push_back(itemset);
@@ -71,9 +93,8 @@ vector<set<int>>& Apriori::gen_postCondition(vector<set<int>>& Cm, vector<set<in
 
 	int m = Hm.size();
 	for (int i = 0;i < Hm.size();i++) {
-		for (int j = 0;j < Hm.size();j++) {
-			if (i == j)
-				continue;
+		for (int j = i + 1;j < Hm.size();j++) {
+			assert(Hm[i] != Hm[j]);
 			if (equal(Hm[i].begin(), --Hm[i].end(), Hm[j].begin())) {
 				set<int> itemset(Hm[i]);
 				itemset.insert(*Hm[j].rbegin());
@@ -139,7 +160,7 @@ void Apriori::generateFn()
 		k++;
 		//候选生成
 		C = apriori_gen(C, k - 1);
-		HashTree hashtree(50);
+		HashTree hashtree(k);
 		map<set<int>, int>::iterator itr;
 		for (itr = C.begin();itr != C.end();itr++) {
 			set<int> temp = itr->first;
@@ -188,6 +209,8 @@ void Apriori::generateRules()
 			while (k > m + 1 && !Hm.empty()) {
 				m++;
 				Cm = gen_postCondition(Cm, Hm);
+				//set<set<int>> temp(Cm.begin(),Cm.end());
+				//Cm.assign(temp.begin(),temp.end());
 				Hm.clear();
 				for (int i = 0;i < Cm.size();i++) {
 					set<int> post(Cm[i]);
@@ -195,7 +218,7 @@ void Apriori::generateRules()
 					set_difference(itr->first.begin(), itr->first.end(), post.begin(), post.end(), back_inserter(dif_set));
 					set<int> pre(dif_set.begin(), dif_set.end());
 
-					assert(pre.size() == k - 2);
+					assert(pre.size() == k - m);
 					double confidence = (double)itr->second / (double)Fk[k - m][pre];
 					if (confidence >= this->min_conf) {
 						Rule r;
@@ -222,11 +245,24 @@ void Apriori::save(ofstream & out)
 		rules[i].save(out);
 	}
 }
+void Apriori::saveAssociation(ofstream & out)
+{
+	map<int, string> dictionary;
+	map<string, int>::iterator itr_dict;
+	for (itr_dict = dict.begin();itr_dict != dict.end();itr_dict++) {
+		dictionary[itr_dict->second] = itr_dict->first;
+	}
+
+	out << setw(8) << setiosflags(ios::left) << "support" << "\t" << setw(8) << "confidence" << "\t" << setw(8) << "lift" << "\t" << setw(8) << "rule" << endl;
+	for (int i = 0;i < this->rules.size();i++) {
+		rules[i].saveAssociation(out, dictionary);
+	}
+}
 ///end function
 
 void Rule::save(ofstream& out)
 {
-	out << this->supp << "\t" << this->conf << "\t" << this->lift << "\t";
+	out << this->supp << "\t\t" << this->conf << "\t\t" << this->lift << "\t\t";
 	out << "{";
 	set<int>::iterator itr_pre, itr_post;
 	for (itr_pre = this->pre.begin();itr_pre != this->pre.end();itr_pre++) {
@@ -241,5 +277,25 @@ void Rule::save(ofstream& out)
 			out << ",";
 	}
 	out << "}";
+	out << endl;
+}
+
+void Rule::saveAssociation(ofstream & out, map<int, string> &dictionary)
+{
+	out << setprecision(2) << this->supp << "\t\t" << this->conf << "\t\t" << this->lift << "\t\t";
+	out << "{ ";
+	set<int>::iterator itr_pre, itr_post;
+	for (itr_pre = this->pre.begin();itr_pre != this->pre.end();itr_pre++) {
+		out << dictionary[*itr_pre];
+		if (itr_pre != --this->pre.end())
+			out << ", ";
+	}
+	out << " => ";
+	for (itr_post = this->post.begin();itr_post != this->post.end();itr_post++) {
+		out << dictionary[*itr_post];
+		if (itr_post != --this->post.end())
+			out << ", ";
+	}
+	out << " }";
 	out << endl;
 }
